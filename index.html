@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SAT 电影词卡</title>
+<title>ClipWords · 片段词 — Grades 6–12 vocab from movies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
@@ -143,6 +143,7 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips i { font-style: normal; font-size: 14px; padding: 3px 9px; border-radius: 999px; background: #262a38; }
 .box.tip { border-left: 3px solid var(--accent); }
+.legal { font-size: 11px; line-height: 1.5; color: var(--muted); margin: 6px 2px 0; }
 
 @keyframes pop { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @keyframes bounce { 0%,100% { transform: translateY(0); } 35% { transform: translateY(-12px); } 65% { transform: translateY(2px); } }
@@ -190,7 +191,7 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
 <script src="words.js"></script>
 <script>
 // ---------- Content ----------
-// Each clip: YouTube id, start/end seconds, and caption cues. cue.t = when the line appears, cue.hit = when the SAT word is said
+// Each clip: YouTube id, start/end seconds, and caption cues. cue.t = when the line appears, cue.hit = when the word is said
 // (measured from YouTube's own captions). Lines are kept short; the clip carries the rest of the scene.
 const SERIES = {
   marvel: { zh: "漫威", en: "Marvel" },
@@ -279,7 +280,7 @@ function say(html, popIt) {
 function renderChrome() {
   const it = FEED[idx];
   document.documentElement.lang = L("zh-CN", "en");
-  $("brand").innerHTML = L("SAT <span>电影</span>词卡", "SAT <span>Movie</span> Words");
+  $("brand").innerHTML = L("Clip<span>Words</span> 片段词", "Clip<span>Words</span>");
   $("langZh").setAttribute("aria-pressed", String(LANG === "zh"));
   const qb = $("quizBtn"); qb.setAttribute("aria-pressed", String(QUIZ)); qb.textContent = QUIZ ? L("小测 开", "Quiz on") : L("小测 关", "Quiz off");
   qb.title = QUIZ ? L("点一下关掉小测", "Tap to turn quizzes off") : L("点一下打开小测", "Tap to turn quizzes on");
@@ -313,7 +314,7 @@ function captionHTML(w, t) {
 function wordPanel(w) {
   const movieLine = LANG === "zh" ? `${esc(w.movie)}（${esc(w.zhMovie)}，${w.year}）` : `${esc(w.movie)} (${w.year})`;
   return `
-    <div class="chip"><small>SAT WORD</small><span class="w ${INLINE ? "hidden" : ""}" id="chipWord">${INLINE ? "• • • • •" : esc(w.word)}</span><span class="ipa" id="chipIpa">${INLINE ? "" : esc(w.ipa)}</span></div>
+    <div class="chip"><small>${esc(L("今日单词", "WORD"))}</small><span class="w ${INLINE ? "hidden" : ""}" id="chipWord">${INLINE ? "• • • • •" : esc(w.word)}</span><span class="ipa" id="chipIpa">${INLINE ? "" : esc(w.ipa)}</span></div>
     <div class="caption"><div id="capLine">${captionHTML(w, INLINE ? -1 : null)}</div>
       <footer><span>${esc(w.speaker)} · ${movieLine}</span><span class="rating">${w.rating}</span></footer></div>
     <div class="host">${HOST_SVG}<div class="bubble" id="bubble"></div></div>
@@ -364,7 +365,7 @@ function render(dir) {
     panel.innerHTML = wordPanel(w);
     $("cliprow").innerHTML = clipRow(w);
     if (INLINE) {
-      host("listen"); say(L(`仔细听……有个 SAT 词要来了`, `Listen… an SAT word is coming`));
+      host("listen"); say(L(`仔细听……有个好词要来了`, `Listen… a big word is coming`));
       drawClipbar(w);
       loadClip(w);
     } else {
@@ -420,9 +421,10 @@ function openSheet() {
     <div class="pron">${esc(w.ipa)}<i>${esc(w.pos)}</i></div>
     <div class="def-en">${esc(w.en)}</div>${zh ? `<div class="def-zh">${esc(w.zh)}</div>` : ""}
     <p class="box"><span class="label">${L("片段里", "IN THE CLIP")}</span><span>${esc(w.noteEn)}</span>${zh ? `<span class="zh">${esc(w.noteZh)}</span>` : ""}</p>
-    <p class="box"><span class="label">${L("SAT 风格例句", "SAT-STYLE EXAMPLE")}</span><span class="en">${ex}</span>${zh ? `<span class="zh">${esc(w.exZh)}</span>` : ""}</p>
+    <p class="box"><span class="label">${L("例句", "EXAMPLE")}</span><span class="en">${ex}</span>${zh ? `<span class="zh">${esc(w.exZh)}</span>` : ""}</p>
     ${extrasHTML(w, zh)}
-    <button type="button" class="closebtn" id="closeSheet">${L("收起", "Close")}</button>`;
+    <button type="button" class="closebtn" id="closeSheet">${L("收起", "Close")}</button>
+    <p class="legal">${L("ClipWords · 6–12 年级电影词汇。高级篇覆盖 SAT® 常考词。", "ClipWords · Grades 6–12 vocab from movies. The Advanced level covers common SAT® words.")} SAT® is a trademark registered by the College Board, which is not affiliated with, and does not endorse, this site. ${L("片段来自 YouTube，版权归原作者。", "Clips play from YouTube; rights belong to their owners.")}</p>`;
   $("closeSheet").addEventListener("click", closeSheet);
   const sb2 = $("sayBtn"); if (sb2) sb2.addEventListener("click", () => speak(w.word));
   $("app").classList.add("sheet-open");
@@ -568,7 +570,7 @@ function setLang(l) {
     $("meaningBtn").addEventListener("click", openSheet);
     const rp = $("replayBtn"); if (rp) rp.addEventListener("click", () => loadClip(it.w, true));
     if (!INLINE) { $("player").innerHTML = jumpTile(it.w); host("wow"); say(`<b>${esc(it.w.word)}</b> = ${esc(L(it.w.short.zh, it.w.short.en))}<br>${L("点上面到 YouTube 看这一句", "Tap above to watch the line")}`); }
-    else { litWord = false; clipEnded = false; host("listen"); say(L("仔细听……有个 SAT 词要来了", "Listen… an SAT word is coming")); if (wasLit || wasEnded) tick(); }
+    else { litWord = false; clipEnded = false; host("listen"); say(L("仔细听……有个好词要来了", "Listen… a big word is coming")); if (wasLit || wasEnded) tick(); }
     if ($("app").classList.contains("sheet-open")) openSheet();
   } else {
     render(0);
