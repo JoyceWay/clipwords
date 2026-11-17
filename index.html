@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAT 电影词卡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #12141c;
+  --panel: #1c1f2b;
+  --line: #2d3142;
+  --text: #f1ede4;
+  --muted: #9ca2b6;
+  --accent: #f5b93a;
+  --accent-ink: #1d1604;
+  --good: #5fd08a;
+  --bad: #ff7a6b;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; }
+.app { position: relative; display: flex; flex-direction: column; height: 100%; max-width: 520px; margin: 0 auto; overflow: hidden; touch-action: none; }
+
+header { display: flex; align-items: center; gap: 10px; padding: 10px 14px 8px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 15px; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.series { font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.spacer { flex: 1; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--panel); }
+.lang button { border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.progress { height: 3px; background: var(--line); margin: 0 14px 10px; border-radius: 2px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+
+.stage { position: relative; margin: 0 14px; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: #07080c; border: 1px solid var(--line); flex: none; }
+#player, #player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.jump { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: var(--text); text-align: center; padding: 14px;
+  background: radial-gradient(ellipse at 50% 120%, rgba(245,185,58,.2), transparent 60%), repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 2px, transparent 2px 6px); }
+.play { width: 58px; height: 58px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; box-shadow: 0 6px 24px rgba(245,185,58,.35); }
+.play svg { width: 24px; height: 24px; margin-left: 4px; }
+.jump b { font-size: 15px; } .jump small { color: var(--muted); font-size: 12px; }
+.quizcover { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 16px;
+  background: radial-gradient(circle at 50% 40%, rgba(245,185,58,.25), transparent 65%), #0c0e14; }
+.quizcover b { display: block; font-family: var(--display); font-size: 30px; font-weight: 800; color: var(--accent); }
+.quizcover span { color: var(--muted); font-size: 14px; }
+.app.is-quiz .quizcover { display: grid; }
+.app.is-quiz .stage { aspect-ratio: auto; height: 76px; }
+.app.is-quiz .quizcover b { font-size: 22px; display: inline; margin-right: 10px; }
+.app.is-quiz .quizcover span { font-size: 13px; }
+.app.is-quiz #player { visibility: hidden; }
+
+.cliprow { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 14px 0; font-size: 12px; color: var(--muted); min-height: 26px; }
+.cliprow button, .cliprow a { background: none; border: 0; padding: 2px 0; color: var(--muted); cursor: pointer; text-decoration: none; font-size: 12px; }
+.soundbtn { background: var(--accent) !important; color: var(--accent-ink) !important; font-weight: 700; padding: 3px 10px !important; border-radius: 999px; }
+
+.panel { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 10px 14px 0; min-height: 0; }
+.slide-in { animation: slideIn .28s ease-out; }
+.slide-back { animation: slideBack .28s ease-out; }
+
+.chip { display: flex; align-items: baseline; gap: 8px; min-height: 30px; }
+.chip small { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.chip .w { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .01em; }
+.chip .w.hidden { color: var(--line); letter-spacing: .2em; }
+.chip .w.pop { color: var(--accent); animation: pop .5s ease-out; }
+.chip .ipa { color: var(--muted); font-size: 13px; }
+
+.caption { background: var(--panel); border-radius: 12px; padding: 12px 14px; min-height: 86px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.caption p { margin: 0; font-family: var(--display); font-weight: 500; font-size: 20px; line-height: 1.3; transition: opacity .2s; }
+.caption p.dim { opacity: .35; }
+.caption .sw { border-bottom: 2px dashed var(--muted); }
+.caption .sw.lit { color: var(--accent); font-weight: 800; border-bottom: 2px solid var(--accent); text-shadow: 0 0 18px rgba(245,185,58,.55); display: inline-block; margin: 0 .1em; animation: pop .5s ease-out; }
+.caption footer { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rating { border: 1px solid var(--muted); border-radius: 4px; padding: 0 4px; font-size: 10px; font-weight: 700; color: var(--text); }
+
+.host { display: flex; align-items: flex-end; gap: 8px; }
+.host svg { width: 76px; height: 84px; flex: none; }
+.host svg.bounce { animation: bounce .6s ease-out; }
+.bubble { position: relative; flex: 1; background: var(--text); color: var(--bg); border-radius: 16px 16px 16px 4px; padding: 10px 12px; font-size: 15px; line-height: 1.4; min-height: 52px; }
+.bubble b { font-family: var(--display); font-weight: 800; color: #b5760a; }
+.bubble.pop { animation: pop .4s ease-out; }
+.e { display: none; }
+svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wow"] .e-wow, svg[data-e="happy"] .e-happy, svg[data-e="oops"] .e-oops { display: inline; }
+
+.actions { display: flex; gap: 10px; }
+.actions button { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); font-weight: 700; cursor: pointer; }
+.actions button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.actions button:focus-visible, .lang button:focus-visible, .navbtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.qsentence { font-family: var(--display); font-weight: 500; font-size: 19px; line-height: 1.35; background: var(--panel); border-radius: 12px; padding: 12px 14px; }
+.qsentence .blank { display: inline-block; min-width: 90px; border-bottom: 3px solid var(--accent); color: var(--accent); font-weight: 800; text-align: center; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.options button { text-align: left; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); font-family: var(--display); font-weight: 700; font-size: 18px; cursor: pointer; }
+.options button b { color: var(--accent); margin-right: 12px; }
+.options button.right b { color: var(--good); } .options button.wrong b { color: var(--bad); }
+.qprompt { font-size: 13px; color: var(--muted); margin-bottom: -4px; }
+.options { gap: 6px !important; }
+@media (max-height: 700px) { .app.is-quiz .host svg { width: 48px; height: 54px; } .app.is-quiz .bubble { font-size: 14px; padding: 8px 10px; min-height: 0; } .qsentence { font-size: 17px; } }
+.options button.right { border-color: var(--good); color: var(--good); }
+.options button.wrong { border-color: var(--bad); color: var(--bad); }
+.options button:disabled { cursor: default; }
+
+.foot { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px calc(10px + env(safe-area-inset-bottom)); font-size: 12px; color: var(--muted); }
+.navbtns { display: flex; gap: 8px; }
+.navbtn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 16px; }
+.navbtn:disabled { opacity: .3; cursor: default; }
+
+.sheet-bg { position: absolute; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 72%; background: #191c27; border-top: 1px solid var(--line); border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .25s ease-out; overflow-y: auto; touch-action: pan-y; display: flex; flex-direction: column; gap: 12px; }
+.app.sheet-open .sheet { transform: none; }
+.app.sheet-open .sheet-bg { opacity: 1; pointer-events: auto; }
+.grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 4px auto 2px; }
+.sheet h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1.1; }
+.sheet .pron { color: var(--muted); font-size: 14px; margin-top: -8px; }
+.sheet .pron i { font-style: normal; color: var(--accent); margin-left: 6px; }
+.def-en { font-size: 19px; font-weight: 700; line-height: 1.35; }
+.def-zh { font-size: 17px; color: var(--muted); margin-top: -8px; }
+.box { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--panel); font-size: 15px; display: flex; flex-direction: column; gap: 6px; }
+.box .zh { color: var(--muted); font-size: 14px; }
+.box .label { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: .08em; }
+.box mark { background: none; color: var(--accent); font-weight: 700; }
+.box .en { font-family: var(--display); font-weight: 500; }
+.closebtn { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); font-weight: 700; cursor: pointer; }
+
+@keyframes pop { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 35% { transform: translateY(-12px); } 65% { transform: translateY(2px); } }
+@keyframes slideIn { from { transform: translateY(24px); opacity: .2; } to { transform: none; opacity: 1; } }
+@keyframes slideBack { from { transform: translateY(-24px); opacity: .2; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (max-height: 640px) { .host svg { width: 60px; height: 66px; } .caption p { font-size: 18px; } .caption { min-height: 72px; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="brand" id="brand"></div>
+    <div class="series" id="series"></div>
+    <div class="spacer"></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="langZh" aria-pressed="true">中英</button>
+      <button type="button" id="langEn" aria-pressed="false">EN</button>
+    </div>
+  </header>
+  <div class="progress"><i id="bar"></i></div>
+
+  <div class="stage" id="stage">
+    <div id="player"></div>
+    <div class="quizcover" id="quizcover"></div>
+  </div>
+  <div class="cliprow" id="cliprow"></div>
+
+  <div class="panel" id="panel"></div>
+
+  <div class="foot">
+    <span id="hint"></span>
+    <div class="navbtns">
+      <button type="button" class="navbtn" id="prev" aria-label="Previous">▲</button>
+      <button type="button" class="navbtn" id="next" aria-label="Next">▼</button>
+    </div>
+  </div>
+
+  <div class="sheet-bg" id="sheetBg"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetWord"></div>
+</div>
+
+<script>
+// ---------- Content ----------
+// Each clip: YouTube id, start/end seconds, and caption cues. cue.t = when the line appears, cue.hit = when the SAT word is said
+// (measured from YouTube's own captions). Lines are kept short; the clip carries the rest of the scene.
+const SERIES = {
+  marvel: { zh: "漫威", en: "Marvel" },
+  nolan: { zh: "诺兰", en: "Nolan" },
+  classic: { zh: "经典大片", en: "Classics" }
+};
+const WORDS = [
+  { word: "inevitable", pos: "adj.", ipa: "/ɪnˈevɪtəbl/", series: "marvel",
+    movie: "Avengers: Endgame", zhMovie: "复仇者联盟4：终局之战", year: 2019, rating: "PG-13", speaker: "Thanos",
+    yt: "KxzNWdOGZsc", start: 0, end: 10, channel: "Illia Honcharov",
+    cues: [{ t: 0.8, text: "I am inevitable.", hit: 2.0 }],
+    short: { zh: "必然发生的", en: "certain to happen" },
+    en: "certain to happen; impossible to stop", zh: "不可避免的；必然发生的",
+    noteEn: "Thanos means no one can stop him. Watch what happens a second later.",
+    noteZh: "灭霸打响指前说“我是必然”，意思是谁也挡不住他。下一秒发生了什么，片段里自己看。",
+    ex: "Once the dam cracked, flooding in the valley below was inevitable.", exZh: "大坝一旦出现裂缝，下游山谷被淹就不可避免了。" },
+  { word: "dread", pos: "v. / n.", ipa: "/dred/", series: "marvel",
+    movie: "Avengers: Infinity War", zhMovie: "复仇者联盟3：无限战争", year: 2018, rating: "PG-13", speaker: "Thanos",
+    yt: "dIlOXAAxPAs", start: 40, end: 48, channel: "Trailer Crunch",
+    cues: [{ t: 41.6, text: "Dread it. Run from it. Destiny arrives all the same.", hit: 41.8 }],
+    short: { zh: "害怕要来的事", en: "fear what's coming" },
+    en: "to fear something that is going to happen", zh: "（对将要发生的事）害怕；恐惧",
+    noteEn: "Dread is the fear of something you know is coming. Dreadful means terrible.",
+    noteZh: "dread 是“还没发生、但你知道它要来”的那种害怕。形容词 dreadful = 可怕的、糟糕的。",
+    ex: "Many students dread the essay section more than the math.", exZh: "很多学生怕写作部分胜过怕数学。" },
+  { word: "philanthropist", pos: "n.", ipa: "/fɪˈlænθrəpɪst/", series: "marvel",
+    movie: "The Avengers", zhMovie: "复仇者联盟", year: 2012, rating: "PG-13", speaker: "Tony Stark",
+    yt: "4-ftbs8TppY", start: 15, end: 24, channel: "ShortClips",
+    cues: [{ t: 20.3, text: "Genius, billionaire, playboy, philanthropist.", hit: 21.9 }],
+    short: { zh: "慈善家", en: "gives to help others" },
+    en: "a person who gives money or time to help others", zh: "慈善家",
+    noteEn: "Break it down: phil- (love) + anthrop- (humankind). Asked what he is without the suit, Tony lists four titles.",
+    noteZh: "拆开记：phil-（爱）+ anthrop-（人类）。美国队长问他脱了战甲还剩什么，Tony 一口气报了四个身份。",
+    ex: "The philanthropist funded scholarships for first-generation college students.", exZh: "这位慈善家为家里第一代上大学的学生设立了奖学金。" },
+  { word: "metaphor", pos: "n.", ipa: "/ˈmetəfɔːr/", series: "marvel",
+    movie: "Guardians of the Galaxy", zhMovie: "银河护卫队", year: 2014, rating: "PG-13", speaker: "Peter Quill / Rocket",
+    yt: "iLttd33j-GQ", start: 9, end: 21, channel: "Katie Aston",
+    cues: [{ t: 11.2, text: "It's just a metaphor, dude.", hit: 12.4 }, { t: 14.4, text: "Metaphors are gonna go over his head.", hit: 15.4 }],
+    short: { zh: "比喻", en: "not meant literally" },
+    en: "describing one thing as if it were another, not meant literally", zh: "隐喻；比喻",
+    noteEn: "“Go over his head” is itself a metaphor for “he won't get it.” Drax takes it literally and says his reflexes are too fast, which proves Rocket's point.",
+    noteZh: "“go over his head”本身就是比喻，意思是“他听不懂”。Drax 却按字面理解，说自己反应快，飞过头顶的东西都能接住。这正好说明什么叫 metaphor 和 literal（字面的）。",
+    ex: "The poet's metaphor of a “paper sky” suggests how fragile the speaker's hopes are.", exZh: "诗人用“纸做的天空”这个隐喻，暗示说话人的希望有多脆弱。" },
+  { word: "resilient", pos: "adj.", ipa: "/rɪˈzɪliənt/", series: "nolan",
+    movie: "Inception", zhMovie: "盗梦空间", year: 2010, rating: "PG-13", speaker: "Cobb",
+    yt: "Bhd00tBhSg4", start: 0, end: 21, channel: "TENET",
+    cues: [{ t: 1.3, text: "What is the most resilient parasite?", hit: 2.3 }, { t: 13.2, text: "…An idea. Resilient. Highly contagious.", hit: 16.5 }],
+    short: { zh: "打不垮的", en: "bounces back" },
+    en: "able to survive damage or bounce back quickly", zh: "有韧性的；打不垮、能很快恢复的",
+    noteEn: "Cobb says the most resilient “parasite” is an idea: once it takes hold, it's almost impossible to get rid of. Listen for eradicate right after it, another SAT word.",
+    noteZh: "Cobb 说最顽强的“寄生虫”是一个想法：一旦在脑子里扎根，几乎没法清除。片段里紧接着还有 eradicate（根除），也是 SAT 词。",
+    ex: "Coral reefs proved more resilient than scientists expected, recovering within a decade.", exZh: "珊瑚礁比科学家预想的更有韧性，十年之内就恢复了。" },
+  { word: "merely", pos: "adv.", ipa: "/ˈmɪrli/", series: "nolan",
+    movie: "The Dark Knight Rises", zhMovie: "蝙蝠侠：黑暗骑士崛起", year: 2012, rating: "PG-13", speaker: "Bane",
+    yt: "F157geaXp_w", start: 3, end: 15, channel: "zontanadaman",
+    cues: [{ t: 3.9, text: "Oh, you think darkness is your ally?", hit: null }, { t: 8.6, text: "You merely adopted the dark. I was born in it.", hit: 9.7 }],
+    short: { zh: "仅仅、只不过", en: "only, nothing more" },
+    en: "only; nothing more than", zh: "仅仅；只不过",
+    noteEn: "Bane is saying Batman only chose the dark later in life, while he was born in it. Merely adds a dismissive “that's all” tone.",
+    noteZh: "Bane 的意思是：你只不过是后来才选择了黑暗，我生来就在黑暗里。merely 带一点“不过如此”的轻视语气。",
+    ex: "The author argues that the new rule is merely symbolic and changes nothing in practice.", exZh: "作者认为新规定只不过是象征性的，实际上什么也没改变。" },
+  { word: "ironic", pos: "adj.", ipa: "/aɪˈrɑːnɪk/", series: "classic",
+    movie: "Star Wars: Revenge of the Sith", zhMovie: "星球大战前传3：西斯的复仇", year: 2005, rating: "PG-13", speaker: "Palpatine",
+    yt: "05dT34hGRdg", start: 92, end: 105, channel: "Star Jedi 951",
+    cues: [{ t: 94.8, text: "Ironic.", hit: 95.0 }, { t: 96.0, text: "He could save others from death, but not himself.", hit: null }],
+    short: { zh: "讽刺的、事与愿违", en: "opposite of expected" },
+    en: "the opposite of what you would expect", zh: "有讽刺意味的；事与愿违的",
+    noteEn: "He could save others but not himself. The outcome is the opposite of what you'd expect, and that is irony.",
+    noteZh: "能救别人，却救不了自己。结果和预期正好相反，这就是 ironic。",
+    ex: "It is ironic that the fire station itself burned down.", exZh: "具有讽刺意味的是，消防站自己被烧毁了。" },
+  { word: "preoccupied", pos: "adj.", ipa: "/priˈɑːkjəpaɪd/", series: "classic",
+    movie: "Jurassic Park", zhMovie: "侏罗纪公园", year: 1993, rating: "PG-13", speaker: "Ian Malcolm",
+    yt: "_oNgyUAEv0Q", start: 49, end: 57, channel: "Darrell Vermilion",
+    cues: [{ t: 53.2, text: "Your scientists were so preoccupied with whether or not they could…", hit: 54.0 }],
+    short: { zh: "只顾着想某件事", en: "too focused on one thing" },
+    en: "so focused on one thing that you ignore others", zh: "全神贯注的；只顾着想某件事的",
+    noteEn: "The rest of the line: they never stopped to ask whether they should. They focused on “could” and ignored “should.”",
+    noteZh: "后半句是：他们没停下来想想“该不该”做。只顾着“能不能”，忽略了“该不该”。",
+    ex: "Preoccupied with her phone, she rode right past her stop.", exZh: "她一直盯着手机，坐过了站。" },
+  { word: "solemnly", pos: "adv.", ipa: "/ˈsɑːləmli/", series: "classic",
+    movie: "Harry Potter and the Prisoner of Azkaban", zhMovie: "哈利·波特与阿兹卡班的囚徒", year: 2004, rating: "PG", speaker: "The Weasley twins",
+    yt: "vNc43oKqQzg", start: 60, end: 75, channel: "Harry Potter", official: true,
+    cues: [{ t: 64.7, text: "I solemnly swear that I am up to no good.", hit: 65.0 }],
+    short: { zh: "郑重地", en: "very seriously" },
+    en: "in a very serious and formal way", zh: "庄严地；郑重地",
+    noteEn: "The joke is the contrast: an oath-like, serious tone for promising to cause trouble. Solemn often goes with oath, promise and ceremony.",
+    noteZh: "笑点在反差：用宣誓一样郑重的语气，说“我要去干坏事”。solemn 常和 oath、promise、ceremony 搭配。",
+    ex: "The new citizens solemnly pledged to uphold the constitution.", exZh: "新入籍的公民郑重宣誓维护宪法。" },
+  { word: "inconceivable", pos: "adj.", ipa: "/ˌɪnkənˈsiːvəbl/", series: "classic",
+    movie: "The Princess Bride", zhMovie: "公主新娘", year: 1987, rating: "PG", speaker: "Vizzini / Inigo",
+    yt: "dTRKCXC0JFg", start: 3, end: 15, channel: "MrJeffooie",
+    cues: [{ t: 7.3, text: "Inconceivable!", hit: 7.5 }, { t: 8.6, text: "You keep using that word…", hit: null }],
+    short: { zh: "不可思议的", en: "impossible to imagine" },
+    en: "impossible to imagine or believe", zh: "难以想象的；不可思议的",
+    noteEn: "Vizzini keeps shouting “Inconceivable!” about things that keep happening. Inigo points out the word may not mean what he thinks.",
+    noteZh: "Vizzini 一直喊“不可能！”，可事情偏偏一次次发生。Inigo 吐槽：你老用这个词，它的意思恐怕不是你以为的那样。",
+    ex: "A century ago, video calls across oceans would have seemed inconceivable.", exZh: "一百年前，跨洋视频通话会被认为是不可想象的。" }
+];
+// Feed: a quick quiz after every 5 words.
+const FEED = [];
+WORDS.forEach((w, k) => {
+  FEED.push({ type: "word", w });
+  if ((k + 1) % 5 === 0) FEED.push({ type: "quiz", block: WORDS.slice(k - 4, k + 1) });
+});
+
+// ---------- State ----------
+let INLINE = false;
+try { INLINE = window.self === window.top; } catch (e) { INLINE = false; }
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("satclips-" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("satclips-" + k, JSON.stringify(v)); } catch (e) {} }
+};
+let LANG = store.get("lang", "zh");
+let idx = 0;
+let streak = store.get("streak", 0);
+let soundOn = false;
+let player = null, playerReady = false, ticker = null;
+let litWord = false, clipEnded = false;
+const quizState = {};
+const L = (zh, en) => (LANG === "zh" ? zh : en);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+const stem = (w) => w.replace(/(ly|e|s)$/i, "");
+const wordRe = (w) => new RegExp("\\b(" + stem(w) + "\\w*)", "gi");
+const ytWatch = (w) => `https://www.youtube.com/watch?v=${w.yt}&t=${Math.floor(w.start)}s`;
+
+// ---------- Host (original popcorn character) ----------
+const HOST_SVG = `
+<svg viewBox="0 0 100 112" id="hostSvg" data-e="neutral" aria-hidden="true">
+  <defs><clipPath id="cup"><path d="M17 44 H83 L75 108 H25 Z"/></clipPath></defs>
+  <g fill="#fff4d6" stroke="#e7cf98" stroke-width="1.5">
+    <circle cx="24" cy="40" r="10"/><circle cx="76" cy="40" r="10"/><circle cx="34" cy="28" r="12"/>
+    <circle cx="66" cy="28" r="12"/><circle cx="50" cy="20" r="14"/><circle cx="42" cy="38" r="11"/><circle cx="58" cy="38" r="11"/>
+  </g>
+  <path d="M17 44 H83 L75 108 H25 Z" fill="#fff"/>
+  <g clip-path="url(#cup)" fill="#e2453c"><rect x="17" y="40" width="11" height="70"/><rect x="39" y="40" width="11" height="70"/><rect x="61" y="40" width="11" height="70"/></g>
+  <path d="M17 44 H83 L75 108 H25 Z" fill="none" stroke="#b8322b" stroke-width="2"/>
+  <ellipse cx="50" cy="76" rx="22" ry="19" fill="#fff4d6"/>
+  <g class="e e-neutral"><circle cx="42" cy="72" r="3.4" fill="#1d1604"/><circle cx="58" cy="72" r="3.4" fill="#1d1604"/><path d="M43 82 Q50 87 57 82" stroke="#1d1604" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+  <g class="e e-listen"><circle cx="43" cy="70" r="3.4" fill="#1d1604"/><circle cx="59" cy="70" r="3.4" fill="#1d1604"/><ellipse cx="50" cy="83" rx="3" ry="2.4" fill="#1d1604"/><path d="M84 62 q7 8 0 16 M89 58 q11 12 0 24" stroke="#f5b93a" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+  <g class="e e-wow"><circle cx="42" cy="71" r="5" fill="#1d1604"/><circle cx="58" cy="71" r="5" fill="#1d1604"/><circle cx="43.5" cy="69.5" r="1.6" fill="#fff"/><circle cx="59.5" cy="69.5" r="1.6" fill="#fff"/><ellipse cx="50" cy="84" rx="5" ry="5.5" fill="#1d1604"/><path d="M8 30 l6 4 M10 18 l6 7 M92 30 l-6 4 M90 18 l-6 7" stroke="#f5b93a" stroke-width="2.6" stroke-linecap="round"/></g>
+  <g class="e e-happy"><path d="M38 73 q4 -6 8 0 M54 73 q4 -6 8 0" stroke="#1d1604" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M41 80 Q50 91 59 80 Z" fill="#1d1604"/><circle cx="35" cy="80" r="3" fill="#f7a9a0"/><circle cx="65" cy="80" r="3" fill="#f7a9a0"/></g>
+  <g class="e e-oops"><path d="M39 69 l6 5 M45 69 l-6 5 M55 69 l6 5 M61 69 l-6 5" stroke="#1d1604" stroke-width="2.4" stroke-linecap="round"/><path d="M42 84 q4 -3 8 0 q4 3 8 0" stroke="#1d1604" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+</svg>`;
+function host(expr, bounce) {
+  const s = $("hostSvg"); if (!s) return;
+  s.setAttribute("data-e", expr);
+  if (bounce) { s.classList.remove("bounce"); void s.getBoundingClientRect(); s.classList.add("bounce"); }
+}
+function say(html, popIt) {
+  const b = $("bubble"); if (!b) return;
+  b.innerHTML = html;
+  if (popIt) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+}
+
+// ---------- Rendering ----------
+function renderChrome() {
+  const it = FEED[idx];
+  document.documentElement.lang = L("zh-CN", "en");
+  $("brand").innerHTML = L("SAT <span>电影</span>词卡", "SAT <span>Movie</span> Words");
+  $("langZh").setAttribute("aria-pressed", String(LANG === "zh"));
+  $("langEn").setAttribute("aria-pressed", String(LANG === "en"));
+  if (it.type === "word") {
+    const inSeries = WORDS.filter((x) => x.series === it.w.series);
+    $("series").textContent = `${L(SERIES[it.w.series].zh, SERIES[it.w.series].en)} ${inSeries.indexOf(it.w) + 1}/${inSeries.length}`;
+  } else {
+    $("series").textContent = L("小测", "Quiz");
+  }
+  const wordsSeen = FEED.slice(0, idx + 1).filter((x) => x.type === "word").length;
+  $("bar").style.width = (wordsSeen / WORDS.length) * 100 + "%";
+  $("hint").textContent = idx === FEED.length - 1 ? L("全部看完了！点 ▲ 可以往回翻", "All done! Tap ▲ to go back") : L("↑ 上滑看下一个", "↑ Swipe up for the next");
+  $("prev").disabled = idx === 0;
+  $("next").disabled = idx === FEED.length - 1;
+  $("app").classList.toggle("is-quiz", it.type === "quiz");
+}
+
+function captionHTML(w, t) {
+  // t = current time; null in link mode (show everything, words lit).
+  let cue = null;
+  if (t === null) return w.cues.map((c) => `<p>${esc(c.text).replace(wordRe(w.word), '<span class="sw lit">$1</span>')}</p>`).join("");
+  for (const c of w.cues) if (t >= c.t - 0.05) cue = c;
+  const show = cue || w.cues[0];
+  const lit = cue && cue.hit !== null && t >= cue.hit;
+  const text = esc(show.text).replace(wordRe(w.word), `<span class="sw${lit ? " lit" : ""}">$1</span>`);
+  return `<p class="${cue ? "" : "dim"}">${text}</p>`;
+}
+
+function wordPanel(w) {
+  const movieLine = LANG === "zh" ? `${esc(w.movie)}（${esc(w.zhMovie)}，${w.year}）` : `${esc(w.movie)} (${w.year})`;
+  return `
+    <div class="chip"><small>SAT WORD</small><span class="w ${INLINE ? "hidden" : ""}" id="chipWord">${INLINE ? "• • • • •" : esc(w.word)}</span><span class="ipa" id="chipIpa">${INLINE ? "" : esc(w.ipa)}</span></div>
+    <div class="caption"><div id="capLine">${captionHTML(w, INLINE ? -1 : null)}</div>
+      <footer><span>${esc(w.speaker)} · ${movieLine}</span><span class="rating">${w.rating}</span></footer></div>
+    <div class="host">${HOST_SVG}<div class="bubble" id="bubble"></div></div>
+    <div class="actions"><button type="button" class="primary" id="meaningBtn">${L("看意思", "Meaning")}</button>${INLINE ? `<button type="button" id="replayBtn">↺ ${L("再看一遍", "Replay")}</button>` : ""}</div>`;
+}
+
+function quizPanel(q) {
+  const st = quizState[idx] || (quizState[idx] = makeQuiz(q.block));
+  const sentence = esc(st.target.ex).replace(wordRe(st.target.word), `<span class="blank" id="blank">${st.answered ? esc(st.target.word) : "?"}</span>`);
+  return `
+    <div class="qprompt">${L("哪个词填进去最合乎逻辑、最精确？", "Which choice completes the text with the most logical and precise word?")}</div>
+    <div class="qsentence">${sentence}</div>
+    <div class="options" id="options">${st.options.map((o, k) => {
+      let cls = "";
+      if (st.answered) { if (o === st.target.word) cls = "right"; else if (k === st.picked) cls = "wrong"; }
+      return `<button type="button" data-k="${k}" class="${cls}" ${st.answered ? "disabled" : ""}><b>${"ABCD"[k]}</b>${esc(o)}</button>`;
+    }).join("")}</div>
+    <div class="host">${HOST_SVG}<div class="bubble" id="bubble"></div></div>`;
+}
+function makeQuiz(block) {
+  const target = block[Math.floor(Math.random() * block.length)];
+  const others = block.filter((x) => x !== target).sort(() => Math.random() - 0.5).slice(0, 3).map((x) => x.word);
+  const options = [target.word, ...others].sort(() => Math.random() - 0.5);
+  return { target, options, answered: false, picked: -1 };
+}
+
+function clipRow(w) {
+  const src = `${L("片段", "Clip")}: YouTube · ${esc(w.channel)}${w.official ? L("（官方）", " (official)") : ""}`;
+  if (!INLINE) return `<span>${L("看完返回这里继续", "Come back here after")}</span><span>${src}</span>`;
+  return `${soundOn ? `<span>${src}</span>` : `<button type="button" class="soundbtn" id="soundBtn">🔊 ${L("点这里开声音", "Tap for sound")}</button>`}<a href="${ytWatch(w)}" target="_blank" rel="noopener">${L("在 YouTube 打开", "Open in YouTube")}</a>`;
+}
+
+function render(dir) {
+  const it = FEED[idx];
+  renderChrome();
+  closeSheet();
+  const panel = $("panel");
+  panel.classList.remove("slide-in", "slide-back"); void panel.offsetWidth;
+  if (dir) panel.classList.add(dir > 0 ? "slide-in" : "slide-back");
+  litWord = false; clipEnded = false;
+
+  if (it.type === "word") {
+    const w = it.w;
+    panel.innerHTML = wordPanel(w);
+    $("cliprow").innerHTML = clipRow(w);
+    if (INLINE) {
+      host("listen"); say(L(`仔细听……有个 SAT 词要来了`, `Listen… an SAT word is coming`));
+      loadClip(w);
+    } else {
+      $("player").innerHTML = jumpTile(w);
+      host("wow"); say(`<b>${esc(w.word)}</b> = ${esc(L(w.short.zh, w.short.en))}<br>${L("点上面到 YouTube 看这一句", "Tap above to watch the line")}`);
+    }
+    $("meaningBtn").addEventListener("click", openSheet);
+    const rp = $("replayBtn"); if (rp) rp.addEventListener("click", () => loadClip(w, true));
+    const sb = $("soundBtn"); if (sb) sb.addEventListener("click", enableSound);
+  } else {
+    if (player && playerReady) player.pauseVideo();
+    stopTicker();
+    $("quizcover").innerHTML = `<div><b>${L("小测", "Quick quiz")}</b><span>${L("哪个词填进去最合适？", "Which word fits?")}</span></div>`;
+    $("cliprow").innerHTML = `<span>${L("连对", "Streak")}: ${streak} 🔥</span><span></span>`;
+    panel.innerHTML = quizPanel(it);
+    const st = quizState[idx];
+    if (st.answered) { const ok = st.options[st.picked] === st.target.word; host(ok ? "happy" : "oops"); say(quizFeedback(ok, st)); }
+    else { host("neutral"); say(L("刚看过的 5 个词里选一个", "Pick one of the 5 words you just saw")); }
+    $("options").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => answer(+b.dataset.k)));
+  }
+  store.set("idx", idx);
+  try { history.replaceState(null, "", it.type === "word" ? "#" + it.w.word : "#quiz-" + idx); } catch (e) {}
+}
+
+function quizFeedback(ok, st) {
+  return ok
+    ? `${L("答对了！", "Correct!")} <b>${esc(st.target.word)}</b> = ${esc(L(st.target.short.zh, st.target.short.en))}`
+    : `${L("差一点！答案是", "Close! It's")} <b>${esc(st.target.word)}</b> = ${esc(L(st.target.short.zh, st.target.short.en))}`;
+}
+function answer(k) {
+  const st = quizState[idx]; if (st.answered) return;
+  st.answered = true; st.picked = k;
+  const ok = st.options[k] === st.target.word;
+  streak = ok ? streak + 1 : 0; store.set("streak", streak);
+  $("panel").innerHTML = quizPanel(FEED[idx]);
+  $("cliprow").innerHTML = `<span>${L("连对", "Streak")}: ${streak} 🔥</span><span></span>`;
+  host(ok ? "happy" : "oops", true); say(quizFeedback(ok, st), true);
+}
+
+function jumpTile(w) {
+  const secs = Math.round(w.end - w.start);
+  const sub = LANG === "zh" ? `${esc(w.zhMovie)} · 从 ${mmss(w.start)} 开始，约 ${secs} 秒` : `${esc(w.movie)} · starts at ${mmss(w.start)}, about ${secs} sec`;
+  return `<a class="jump" href="${ytWatch(w)}" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="#1d1604"/></svg></span><b>${L("到 YouTube 看这一句", "Watch this line on YouTube")}</b><small>${sub}</small></a>`;
+}
+
+// ---------- Meaning sheet ----------
+function openSheet() {
+  const it = FEED[idx]; if (it.type !== "word") return;
+  const w = it.w, zh = LANG === "zh";
+  const ex = esc(w.ex).replace(wordRe(w.word), "<mark>$1</mark>");
+  $("sheet").innerHTML = `
+    <div class="grab"></div>
+    <h2 id="sheetWord">${esc(w.word)}</h2>
+    <div class="pron">${esc(w.ipa)}<i>${esc(w.pos)}</i></div>
+    <div class="def-en">${esc(w.en)}</div>${zh ? `<div class="def-zh">${esc(w.zh)}</div>` : ""}
+    <p class="box"><span class="label">${L("片段里", "IN THE CLIP")}</span><span>${esc(w.noteEn)}</span>${zh ? `<span class="zh">${esc(w.noteZh)}</span>` : ""}</p>
+    <p class="box"><span class="label">${L("SAT 风格例句", "SAT-STYLE EXAMPLE")}</span><span class="en">${ex}</span>${zh ? `<span class="zh">${esc(w.exZh)}</span>` : ""}</p>
+    <button type="button" class="closebtn" id="closeSheet">${L("收起", "Close")}</button>`;
+  $("closeSheet").addEventListener("click", closeSheet);
+  $("app").classList.add("sheet-open");
+  $("closeSheet").focus({ preventScroll: true });
+}
+function closeSheet() { $("app").classList.remove("sheet-open"); }
+$("sheetBg").addEventListener("click", closeSheet);
+
+// ---------- YouTube player (inline mode only) ----------
+function loadClip(w, isReplay) {
+  if (!playerReady) return; // onReady loads the current clip
+  player.loadVideoById({ videoId: w.yt, startSeconds: w.start, endSeconds: w.end });
+  if (soundOn) { player.unMute(); player.setVolume(100); } else { player.mute(); }
+  if (isReplay) { litWord = false; clipEnded = false; host("listen"); say(L("再听一遍……", "One more time…")); }
+  startTicker();
+  // If the browser blocks playback with sound, fall back to muted autoplay.
+  setTimeout(() => {
+    if (!player || !player.getPlayerState) return;
+    const s = player.getPlayerState();
+    if (soundOn && s !== 1 && s !== 3) { soundOn = false; player.mute(); player.playVideo(); $("cliprow").innerHTML = clipRow(w); const sb = $("soundBtn"); if (sb) sb.addEventListener("click", enableSound); }
+  }, 1500);
+}
+function enableSound() {
+  soundOn = true;
+  if (player && playerReady) { player.unMute(); player.setVolume(100); if (player.getPlayerState() !== 1) player.playVideo(); }
+  const it = FEED[idx]; if (it.type === "word") $("cliprow").innerHTML = clipRow(it.w);
+}
+function startTicker() { stopTicker(); ticker = setInterval(tick, 100); }
+function stopTicker() { if (ticker) clearInterval(ticker); ticker = null; }
+function tick() {
+  const it = FEED[idx]; if (it.type !== "word" || !player || !player.getCurrentTime) return;
+  const w = it.w, t = player.getCurrentTime();
+  // Redraw the caption only when the visible line or its highlight changes, so the pop animation plays once.
+  let ci = -1; w.cues.forEach((c, k) => { if (t >= c.t - 0.05) ci = k; });
+  const key = ci + "|" + (ci >= 0 && w.cues[ci].hit !== null && t >= w.cues[ci].hit);
+  const cap = $("capLine");
+  if (cap && cap.dataset.key !== key) { cap.dataset.key = key; cap.innerHTML = captionHTML(w, t); }
+  const firstHit = w.cues.find((c) => c.hit !== null);
+  if (!litWord && firstHit && t >= firstHit.hit) {
+    litWord = true;
+    const cw = $("chipWord"); cw.textContent = w.word; cw.className = "w pop"; $("chipIpa").textContent = w.ipa;
+    host("wow", true);
+    say(`<b>${esc(w.word)}</b>${L("！", "!")} = ${esc(L(w.short.zh, w.short.en))}`, true);
+  }
+  const state = player.getPlayerState();
+  if (!clipEnded && (state === 0 || t >= w.end - 0.15)) {
+    clipEnded = true;
+    host("happy", true);
+    say(`<b>${esc(w.word)}</b> = ${esc(L(w.short.zh, w.short.en))}<br>${L("点「看意思」看例句，或者上滑下一个", "Tap Meaning for more, or swipe up")}`, true);
+    if (!litWord) { const cw = $("chipWord"); cw.textContent = w.word; cw.className = "w pop"; $("chipIpa").textContent = w.ipa; litWord = true; }
+  }
+}
+function initPlayer() {
+  const first = FEED.find((x) => x.type === "word").w;
+  const cur = FEED[idx].type === "word" ? FEED[idx].w : first;
+  player = new YT.Player("player", {
+    videoId: cur.yt,
+    playerVars: { start: Math.floor(cur.start), end: Math.ceil(cur.end), playsinline: 1, rel: 0, modestbranding: 1, autoplay: 1, mute: 1, cc_load_policy: 0, iv_load_policy: 3 },
+    events: {
+      onReady: () => { playerReady = true; if (FEED[idx].type === "word") loadClip(FEED[idx].w); },
+      onStateChange: () => tick()
+    }
+  });
+}
+if (INLINE) {
+  window.onYouTubeIframeAPIReady = initPlayer;
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  s.onerror = () => { INLINE = false; render(0); };
+  document.head.appendChild(s);
+}
+
+// ---------- Navigation ----------
+function go(n) {
+  if (n < 0 || n >= FEED.length || n === idx) return;
+  const dir = n > idx ? 1 : -1;
+  idx = n; render(dir);
+}
+$("prev").addEventListener("click", () => go(idx - 1));
+$("next").addEventListener("click", () => go(idx + 1));
+$("langZh").addEventListener("click", () => setLang("zh"));
+$("langEn").addEventListener("click", () => setLang("en"));
+function setLang(l) {
+  if (l === LANG) return;
+  LANG = l; store.set("lang", l);
+  // Re-render text only; keep the clip playing.
+  const it = FEED[idx];
+  renderChrome();
+  if (it.type === "word") {
+    const wasLit = litWord, wasEnded = clipEnded;
+    $("panel").innerHTML = wordPanel(it.w);
+    $("cliprow").innerHTML = clipRow(it.w);
+    $("meaningBtn").addEventListener("click", openSheet);
+    const rp = $("replayBtn"); if (rp) rp.addEventListener("click", () => loadClip(it.w, true));
+    const sb = $("soundBtn"); if (sb) sb.addEventListener("click", enableSound);
+    if (!INLINE) { $("player").innerHTML = jumpTile(it.w); host("wow"); say(`<b>${esc(it.w.word)}</b> = ${esc(L(it.w.short.zh, it.w.short.en))}<br>${L("点上面到 YouTube 看这一句", "Tap above to watch the line")}`); }
+    else { litWord = false; clipEnded = false; host("listen"); say(L("仔细听……有个 SAT 词要来了", "Listen… an SAT word is coming")); if (wasLit || wasEnded) tick(); }
+    if ($("app").classList.contains("sheet-open")) openSheet();
+  } else {
+    render(0);
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeSheet();
+  if ($("app").classList.contains("sheet-open")) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); go(idx + 1); }
+  if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(idx - 1); }
+});
+// Vertical swipe anywhere outside the video; the sheet scrolls on its own.
+let sy = null, sx = null;
+$("app").addEventListener("touchstart", (e) => {
+  if (e.target.closest(".stage") || $("app").classList.contains("sheet-open")) { sy = null; return; }
+  sy = e.touches[0].clientY; sx = e.touches[0].clientX;
+}, { passive: true });
+$("app").addEventListener("touchend", (e) => {
+  if (sy === null) return;
+  const dy = e.changedTouches[0].clientY - sy, dx = e.changedTouches[0].clientX - sx;
+  if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.3) go(dy < 0 ? idx + 1 : idx - 1);
+  sy = null;
+}, { passive: true });
+let wheelLock = 0;
+$("app").addEventListener("wheel", (e) => {
+  if ($("app").classList.contains("sheet-open") || Math.abs(e.deltaY) < 30 || Date.now() < wheelLock) return;
+  wheelLock = Date.now() + 600; go(e.deltaY > 0 ? idx + 1 : idx - 1);
+}, { passive: true });
+
+// ---------- Start ----------
+(function start() {
+  const h = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  const byHash = FEED.findIndex((x) => x.type === "word" && x.w.word === h);
+  const saved = store.get("idx", 0);
+  idx = byHash >= 0 ? byHash : (saved >= 0 && saved < FEED.length ? saved : 0);
+  render(0);
+})();
+</script>
+</body>
+</html>
