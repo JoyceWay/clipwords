@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClipWords · 片段词 — Grades 6–12 vocab from movies</title>
+<meta name="description" content="Learn big words from real movie lines. Short clips, the moment the word is said, a clear meaning in English and Chinese, and a quick quiz. Four levels, from first English words to grades 11–12.">
+<link rel="canonical" href="https://joyceway.github.io/clipwords/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ClipWords · 片段词">
+<meta property="og:title" content="ClipWords · 片段词 — big words from real movie lines">
+<meta property="og:description" content="Short movie clips, the word lit up the moment it's said, bilingual meanings and quick quizzes.">
+<meta property="og:url" content="https://joyceway.github.io/clipwords/">
+<meta property="og:image" content="https://joyceway.github.io/clipwords/og/home.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#12141c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
@@ -31,7 +41,17 @@ button { font: inherit; color: inherit; }
 header { display: flex; align-items: center; gap: 8px; padding: 10px 14px 8px; }
 .brand { font-family: var(--display); font-weight: 700; font-size: 15px; white-space: nowrap; flex-shrink: 0; }
 .brand span { color: var(--accent); }
-.series { font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 2px 9px; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.series { font: inherit; font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 999px; padding: 2px 9px; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.series::after { content: " ▾"; font-size: 10px; }
+.subhead { display: flex; padding: 0 14px 8px; min-width: 0; }
+.levelmenu { position: absolute; top: 74px; left: 14px; z-index: 30; background: #1b1e29; border: 1px solid var(--line); border-radius: 12px; padding: 6px; min-width: 210px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.levelmenu[hidden] { display: none; }
+.levelmenu button { display: flex; width: 100%; justify-content: space-between; gap: 12px; font: inherit; font-size: 14px; color: var(--text); background: none; border: 0; border-radius: 8px; padding: 9px 10px; text-align: left; cursor: pointer; }
+.levelmenu button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.levelmenu button:disabled { color: var(--muted); opacity: .55; cursor: default; }
+.levelmenu small { color: inherit; opacity: .75; font-size: 12px; }
+.menubrand { font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--muted); padding: 6px 10px 8px; }
+.menubrand span { color: var(--accent); }
 .spacer { flex: 1; }
 .lang { flex-shrink: 0; display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--panel); }
 .lang button { white-space: nowrap; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; cursor: pointer; }
@@ -67,11 +87,12 @@ header { display: flex; align-items: center; gap: 8px; padding: 10px 14px 8px; }
 .soundbtn { background: var(--accent) !important; color: var(--accent-ink) !important; font-weight: 700; padding: 3px 10px !important; border-radius: 999px; }
 
 .panel { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 10px 14px 0; min-height: 0; }
+.panel > * { flex-shrink: 0; }
 .slide-in { animation: slideIn .28s ease-out; }
 .slide-back { animation: slideBack .28s ease-out; }
 
-.chip { display: flex; align-items: baseline; gap: 8px; min-height: 30px; }
-.chip small { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.chip { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 0; min-height: 30px; flex-shrink: 0; }
+.chip small { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); white-space: nowrap; }
 .chip .w { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .01em; }
 .chip .w.hidden { color: var(--line); letter-spacing: .2em; }
 .chip .w.pop { color: var(--accent); animation: pop .5s ease-out; }
@@ -144,6 +165,8 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
 .chips i { font-style: normal; font-size: 14px; padding: 3px 9px; border-radius: 999px; background: #262a38; }
 .box.tip { border-left: 3px solid var(--accent); }
 .legal { font-size: 11px; line-height: 1.5; color: var(--muted); margin: 6px 2px 0; }
+.sheetlinks { font-size: 13px; margin: 12px 2px 0; color: var(--muted); }
+.sheetlinks a { color: var(--accent); }
 
 @keyframes pop { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @keyframes bounce { 0%,100% { transform: translateY(0); } 35% { transform: translateY(-12px); } 65% { transform: translateY(2px); } }
@@ -151,13 +174,24 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
 @keyframes slideBack { from { transform: translateY(-24px); opacity: .2; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (max-height: 640px) { .host svg { width: 60px; height: 66px; } .caption p { font-size: 18px; } .caption { min-height: 72px; } }
+@media (max-width: 400px) { .chip .w { font-size: 23px; } }
+/* When a long quote or message doesn't fit, step the panel down instead of letting it overlap. */
+.app.tight .panel { gap: 7px; padding-top: 6px; }
+.app.tight .caption { min-height: 0; padding: 9px 12px; }
+.app.tight .caption p { font-size: 17px; }
+.app.tight .host svg { width: 52px; height: 58px; }
+.app.tight .actions button { padding: 9px; }
+.app.tighter .host svg { width: 40px; height: 44px; }
+.app.tighter .caption p { font-size: 15.5px; }
+.app.tighter .bubble { font-size: 14px; min-height: 0; padding: 8px 10px; }
+/* Short screens (most phones in a browser): the episode chip takes the brand's place in the header, so it costs no height. */
+@media (max-height: 760px) { .app > header .brand { display: none; } .subhead { position: absolute; top: 10px; left: 14px; padding: 0; z-index: 2; max-width: calc(100% - 196px); } .subhead .series { min-height: 26px; } .levelmenu { top: 44px; } }
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <header>
     <div class="brand" id="brand"></div>
-    <div class="series" id="series"></div>
     <div class="spacer"></div>
     <button type="button" class="quizbtn" id="quizBtn" aria-pressed="true"></button>
     <div class="lang" role="group" aria-label="Language">
@@ -165,7 +199,9 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
       <button type="button" id="langEn" aria-pressed="false">EN</button>
     </div>
   </header>
+  <div class="subhead"><button type="button" class="series" id="series" aria-haspopup="menu" aria-expanded="false"></button></div>
   <div class="progress"><i id="bar"></i></div>
+  <div class="levelmenu" id="levelMenu" role="menu" hidden></div>
 
   <div class="stage" id="stage">
     <div id="player"></div>
@@ -193,22 +229,41 @@ svg[data-e="neutral"] .e-neutral, svg[data-e="listen"] .e-listen, svg[data-e="wo
 // ---------- Content ----------
 // Each clip: YouTube id, start/end seconds, and caption cues. cue.t = when the line appears, cue.hit = when the word is said
 // (measured from YouTube's own captions). Lines are kept short; the clip carries the rest of the scene.
-const SERIES = {
-  marvel: { zh: "漫威", en: "Marvel" },
-  nolan: { zh: "诺兰", en: "Nolan" },
-  classic: { zh: "经典大片", en: "Classics" },
-  hp: { zh: "哈利·波特", en: "Harry Potter" },
-  starwars: { zh: "星球大战", en: "Star Wars" }
+// Four levels, 12 episodes per season, one word per episode.
+const LEVELS = {
+  starter: { zh: "入门", en: "Starter", sub: { zh: "刚学英语", en: "New to English" } },
+  basic: { zh: "基础", en: "Basic", sub: { zh: "6–8 年级", en: "Grades 6–8" } },
+  inter: { zh: "中级", en: "Intermediate", sub: { zh: "9–10 年级", en: "Grades 9–10" } },
+  adv: { zh: "高级", en: "Advanced", sub: { zh: "11–12 年级", en: "Grades 11–12" } }
 };
-const WORDS = window.SAT_WORDS || [];
-// Feed: a quick quiz after every 5 words, unless the viewer switched quizzes off.
+const LEVEL_ORDER = ["starter", "basic", "inter", "adv"];
+const ALL_WORDS = (window.SAT_WORDS || []).slice().sort((a, b) =>
+  LEVEL_ORDER.indexOf(a.level) - LEVEL_ORDER.indexOf(b.level) || a.season - b.season || a.ep - b.ep);
+let LEVEL = "all";
+let WORDS = ALL_WORDS;
+const levelWords = (lv) => (lv === "all" ? ALL_WORDS : ALL_WORDS.filter((w) => w.level === lv));
+const epLabel = (w) => L(`${LEVELS[w.level].zh}篇 · 第${w.season}季 第${w.ep}集`, `${LEVELS[w.level].en} · S${w.season} · E${w.ep}`);
+// Feed: a quiz after episodes 6 and 12 once that half-season is all online;
+// until then, a quiz after every 5 words. Quizzes can be switched off.
 const FEED = [];
 let QUIZ = true;
 function buildFeed() {
   FEED.length = 0;
-  WORDS.forEach((w, k) => {
+  WORDS = levelWords(LEVEL);
+  let pending = [];
+  WORDS.forEach((w) => {
     FEED.push({ type: "word", w });
-    if (QUIZ && (k + 1) % 5 === 0) FEED.push({ type: "quiz", block: WORDS.slice(k - 4, k + 1) });
+    pending.push(w);
+    if (!QUIZ) return;
+    if (w.ep === 6 || w.ep === 12) {
+      const half = WORDS.filter((x) => x.level === w.level && x.season === w.season && x.ep > w.ep - 6 && x.ep <= w.ep);
+      if (half.length === 6) {
+        FEED.push({ type: "quiz", block: half });
+        pending = pending.filter((x) => !half.includes(x));
+        return;
+      }
+    }
+    if (pending.length === 5) { FEED.push({ type: "quiz", block: pending }); pending = []; }
   });
 }
 
@@ -270,9 +325,18 @@ function host(expr, bounce) {
   s.setAttribute("data-e", expr);
   if (bounce) { s.classList.remove("bounce"); void s.getBoundingClientRect(); s.classList.add("bounce"); }
 }
+// Steps the panel down (smaller quote, smaller host) only when its content would spill over the buttons.
+function fitPanel(reset) {
+  const a = $("app"), p = $("panel");
+  if (reset) a.classList.remove("tight", "tighter");
+  const over = () => p.scrollHeight > p.clientHeight + 1;
+  if (over() && !a.classList.contains("tight")) a.classList.add("tight");
+  if (over()) a.classList.add("tighter");
+}
 function say(html, popIt) {
   const b = $("bubble"); if (!b) return;
   b.innerHTML = html;
+  fitPanel(false);
   if (popIt) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
 }
 
@@ -286,11 +350,12 @@ function renderChrome() {
   qb.title = QUIZ ? L("点一下关掉小测", "Tap to turn quizzes off") : L("点一下打开小测", "Tap to turn quizzes on");
   $("langEn").setAttribute("aria-pressed", String(LANG === "en"));
   if (it.type === "word") {
-    const inSeries = WORDS.filter((x) => x.series === it.w.series);
-    $("series").textContent = `${L(SERIES[it.w.series].zh, SERIES[it.w.series].en)} ${inSeries.indexOf(it.w) + 1}/${inSeries.length}`;
+    $("series").textContent = epLabel(it.w);
   } else {
     $("series").textContent = L("小测", "Quiz");
   }
+  $("series").title = L("选择篇目", "Choose a level");
+  $("series").setAttribute("aria-label", `${$("series").textContent}. ${L("点一下选择篇目", "Tap to choose a level")}`);
   const wordsSeen = FEED.slice(0, idx + 1).filter((x) => x.type === "word").length;
   $("bar").style.width = (wordsSeen / WORDS.length) * 100 + "%";
   $("hint").textContent = idx === FEED.length - 1 ? L("全部看完了！点 ▲ 可以往回翻", "All done! Tap ▲ to go back") : L("↑ 上滑看下一个", "↑ Swipe up for the next");
@@ -382,9 +447,10 @@ function render(dir) {
     panel.innerHTML = quizPanel(it);
     const st = quizState[idx];
     if (st.answered) { const ok = st.options[st.picked] === st.target.word; host(ok ? "happy" : "oops"); say(quizFeedback(ok, st)); }
-    else { host("neutral"); say(L("刚看过的 5 个词里选一个", "Pick one of the 5 words you just saw")); }
+    else { host("neutral"); say(L(`刚看过的 ${it.block.length} 个词里选一个`, `Pick one of the ${it.block.length} words you just saw`)); }
     $("options").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => answer(+b.dataset.k)));
   }
+  fitPanel(true);
   store.set("idx", idx);
   try { history.replaceState(null, "", it.type === "word" ? "#" + it.w.word : "#quiz-" + idx); } catch (e) {}
 }
@@ -424,6 +490,7 @@ function openSheet() {
     <p class="box"><span class="label">${L("例句", "EXAMPLE")}</span><span class="en">${ex}</span>${zh ? `<span class="zh">${esc(w.exZh)}</span>` : ""}</p>
     ${extrasHTML(w, zh)}
     <button type="button" class="closebtn" id="closeSheet">${L("收起", "Close")}</button>
+    <p class="sheetlinks"><a href="w/${encodeURIComponent(w.word)}.html">${L("这个词的单独页面（可分享）", "Page for this word (to share)")}</a> · <a href="w/">${L("全部单词", "All words")}</a></p>
     <p class="legal">${L("ClipWords · 6–12 年级电影词汇。高级篇覆盖 SAT® 常考词。", "ClipWords · Grades 6–12 vocab from movies. The Advanced level covers common SAT® words.")} SAT® is a trademark registered by the College Board, which is not affiliated with, and does not endorse, this site. ${L("片段来自 YouTube，版权归原作者。", "Clips play from YouTube; rights belong to their owners.")}</p>`;
   $("closeSheet").addEventListener("click", closeSheet);
   const sb2 = $("sayBtn"); if (sb2) sb2.addEventListener("click", () => speak(w.word));
@@ -494,7 +561,7 @@ function tick() {
   let ci = -1; w.cues.forEach((c, k) => { if (t >= c.t - 0.05) ci = k; });
   const key = ci + "|" + (ci >= 0 && w.cues[ci].hit !== null && t >= w.cues[ci].hit);
   const cap = $("capLine");
-  if (cap && cap.dataset.key !== key) { cap.dataset.key = key; cap.innerHTML = captionHTML(w, t); }
+  if (cap && cap.dataset.key !== key) { cap.dataset.key = key; cap.innerHTML = captionHTML(w, t); fitPanel(false); }
   const firstHit = w.cues.find((c) => c.hit !== null);
   if (!litWord && firstHit && t >= firstHit.hit) {
     litWord = true;
@@ -518,6 +585,8 @@ function initPlayer() {
   const first = FEED.find((x) => x.type === "word").w;
   const cur = FEED[idx].type === "word" ? FEED[idx].w : first;
   player = new YT.Player("player", {
+    // Privacy-enhanced mode: YouTube sets no cookies until the clip plays.
+    host: "https://www.youtube-nocookie.com",
     videoId: cur.yt,
     playerVars: { start: Math.floor(cur.start), end: Math.ceil(cur.end), playsinline: 1, rel: 0, modestbranding: 1, autoplay: 1, mute: 1, controls: 0, disablekb: 1, cc_load_policy: 0, iv_load_policy: 3 },
     events: {
@@ -554,8 +623,38 @@ function setQuiz(on) {
   const n = FEED.findIndex((x) => x.type === "word" && x.w === anchor);
   if (cur.type === "quiz") { idx = Math.min(n + 1, FEED.length - 1); render(1); }
   else { idx = n; store.set("idx", idx); renderChrome(); } // same clip keeps playing
-  say(on ? L("小测打开了：每看 5 个词做一题", "Quizzes on: one after every 5 words") : L("小测关掉了，只看片段", "Quizzes off: clips only"), true);
+  say(on ? L("小测打开了：每看完一组词做一题", "Quizzes on: one after each set of words") : L("小测关掉了，只看片段", "Quizzes off: clips only"), true);
 }
+// ---------- Level menu ----------
+function levelMenuHTML() {
+  const row = (lv, name, sub) => {
+    const n = levelWords(lv).length;
+    return `<button type="button" role="menuitemradio" data-lv="${lv}" aria-checked="${LEVEL === lv}" ${n ? "" : "disabled"}><span>${esc(name)}${sub ? ` <small>${esc(sub)}</small>` : ""}</span><small>${n ? L(`${n} 个词`, `${n} words`) : L("即将上线", "Coming soon")}</small></button>`;
+  };
+  return `<div class="menubrand">Clip<span>Words</span>${L(" 片段词", "")}</div>` + row("all", L("全部", "All levels"), "") + LEVEL_ORDER.map((lv) => row(lv, L(LEVELS[lv].zh + "篇", LEVELS[lv].en), L(LEVELS[lv].sub.zh, LEVELS[lv].sub.en))).join("");
+}
+function toggleLevelMenu(open) {
+  const m = $("levelMenu");
+  const show = open === undefined ? m.hidden : open;
+  if (show) m.innerHTML = levelMenuHTML();
+  m.hidden = !show;
+  $("series").setAttribute("aria-expanded", String(show));
+}
+function setLevel(lv) {
+  toggleLevelMenu(false);
+  if (lv === LEVEL || !levelWords(lv).length) return;
+  LEVEL = lv; store.set("level", lv); buildFeed();
+  clearTimeout(loopTimer);
+  idx = 0; store.set("idx", 0); render(1);
+  say(lv === "all" ? L("现在看全部篇目", "Showing all levels") : L(`现在只看${LEVELS[lv].zh}篇`, `Showing ${LEVELS[lv].en} only`), true);
+}
+$("series").addEventListener("click", (e) => { e.stopPropagation(); toggleLevelMenu(); });
+$("levelMenu").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const b = e.target.closest("button[data-lv]");
+  if (b && !b.disabled) setLevel(b.dataset.lv);
+});
+document.addEventListener("click", () => { if (!$("levelMenu").hidden) toggleLevelMenu(false); });
 $("langEn").addEventListener("click", () => setLang("en"));
 function setLang(l) {
   if (l === LANG) return;
@@ -572,10 +671,12 @@ function setLang(l) {
     if (!INLINE) { $("player").innerHTML = jumpTile(it.w); host("wow"); say(`<b>${esc(it.w.word)}</b> = ${esc(L(it.w.short.zh, it.w.short.en))}<br>${L("点上面到 YouTube 看这一句", "Tap above to watch the line")}`); }
     else { litWord = false; clipEnded = false; host("listen"); say(L("仔细听……有个好词要来了", "Listen… a big word is coming")); if (wasLit || wasEnded) tick(); }
     if ($("app").classList.contains("sheet-open")) openSheet();
+    fitPanel(true);
   } else {
     render(0);
   }
 }
+window.addEventListener("resize", () => fitPanel(true));
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeSheet();
   if ($("app").classList.contains("sheet-open")) return;
@@ -602,9 +703,13 @@ $("app").addEventListener("wheel", (e) => {
 
 // ---------- Start ----------
 QUIZ = store.get("quiz", true);
-buildFeed();
+LEVEL = store.get("level", "all");
+if (LEVEL !== "all" && (!LEVELS[LEVEL] || !levelWords(LEVEL).length)) LEVEL = "all";
 (function start() {
   const h = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  // A shared link to one word always opens, whatever level the viewer picked last time.
+  if (h && LEVEL !== "all" && !levelWords(LEVEL).some((w) => w.word === h) && ALL_WORDS.some((w) => w.word === h)) LEVEL = "all";
+  buildFeed();
   const byHash = FEED.findIndex((x) => x.type === "word" && x.w.word === h);
   const saved = store.get("idx", 0);
   idx = byHash >= 0 ? byHash : (saved >= 0 && saved < FEED.length ? saved : 0);
